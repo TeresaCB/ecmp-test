@@ -10,8 +10,28 @@ module circuit
    `OUTPUT(y,32)
    );
 
-   `SIGNAL(acc, 32)
-   `ACC_ARE(clk, rst, 1'b0, en, acc, x)
-   `SIGNAL2OUT(y, acc)
+   `SIGNAL(cnt, 7) //7-bit counter as iterator
+   `SIGNAL(y_int, 32) //internal y
+   `SIGNAL(y_int_n_1, 32) //y(n-1)
+   `SIGNAL2OUT(y, y_int)//connect internal y to output
+   
+   //y shift register 
+   `REG_ARE(clk, rst, 1'b0, en&(cnt!=99), y_int_n_1, y_int)
+
+   //iteration counter
+   `COUNTER_ARE(clk, rst, cnt!=99, cnt)
+
+   //compute next why
+   `COMB begin 
+  
+   	if(x[31]==1'b1) begin
+   		y_int = y_int_n_1 - x;
+   	end
+ 	else begin
+   		y_int = y_int_n_1 + x;
+   	end
+     
+   end
+   
    
 endmodule
